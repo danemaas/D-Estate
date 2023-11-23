@@ -11,6 +11,7 @@ mongoose
   .catch((err) => {
     console.log("Error connecting to DB: ", err);
   });
+
 const app = express();
 
 app.listen(3000, () => {
