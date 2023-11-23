@@ -5,7 +5,6 @@ import { EyeIcon, EyeOff } from "lucide-react";
 const Signin = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [userDetails, setUserDetails] = useState({
-    username: "",
     email: "",
     password: "",
   });
@@ -25,6 +24,10 @@ const Signin = () => {
           <label>Email</label>
           <input
             type="email"
+            value={userDetails.email}
+            onChange={(e) =>
+              setUserDetails({ ...userDetails, email: e.target.value })
+            }
             className="p-2 rounded-md border-2 outline-none"
           />
         </div>
@@ -32,6 +35,10 @@ const Signin = () => {
           <label>Password</label>
           <input
             type={isVisible ? "text" : "password"}
+            value={userDetails.password}
+            onChange={(e) =>
+              setUserDetails({ ...userDetails, password: e.target.value })
+            }
             className="p-2 rounded-md border-2 outline-none"
           />
           <div className="absolute right-3 bottom-3 cursor-pointer">
