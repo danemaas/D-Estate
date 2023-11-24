@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { EyeIcon, EyeOff, Loader2 } from "lucide-react";
+
+import {
+  signInStart,
+  signInSuccess,
+  signInFailed,
+} from "../redux/user/userSlice.js";
 
 const Signin = () => {
   const initialData = {
@@ -8,14 +15,14 @@ const Signin = () => {
     password: "",
   };
   const [isVisible, setIsVisible] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [userDetails, setUserDetails] = useState(initialData);
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    dispatch(signInStart());
     try {
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -28,15 +35,14 @@ const Signin = () => {
       const data = await res.json();
 
       if (data.success === false) {
-        setError(data.message);
-        setLoading(false);
+        dispatch(signInFailed(data.message));
         return;
       }
 
+      dispatch(signInSuccess(data));
       navigate("/");
     } catch (err) {
-      setLoading(false);
-      setError(err.message);
+      dispatch(signInFailed(err.message));
     }
   };
 
