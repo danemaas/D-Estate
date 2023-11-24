@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const Header = () => {
   const [searchInput, setSearchInput] = useState("");
-
+  const { currentUser } = useSelector((state) => state.user);
   return (
     <header
       className="w-full flex justify-between items-center py-3 px-2 md:px-10
@@ -53,11 +54,25 @@ const Header = () => {
             />
           </li>
           <li className="text-sm md:text-base relative group">
-            <Link to="/sign-in">Sign In</Link>
-            <div
-              className="absolute -bottom-[2px] w-0 h-[2px] bg-cyan-400 group-hover:w-full
+            {currentUser ? (
+              <>
+                <Link to="/profile">
+                  <img
+                    src={currentUser.profileImage}
+                    alt="profile"
+                    className="rounded-full w-8 h-8 object-cover"
+                  />
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link to="/sign-in">Sign In</Link>
+                <div
+                  className="absolute -bottom-[2px] w-0 h-[2px] bg-cyan-400 group-hover:w-full
               transition-all duration-300 origin-center"
-            />
+                />
+              </>
+            )}
           </li>
         </ul>
       </nav>

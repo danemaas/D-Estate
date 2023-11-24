@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { EyeIcon, EyeOff, Loader2 } from "lucide-react";
+import OAuth from "../components/OAuth";
 
 const Signup = () => {
   const initialData = {
@@ -105,12 +106,7 @@ const Signup = () => {
               "sign up"
             )}
           </button>
-          <button
-            className="border-2 p-2 uppercase rounded-md hover:bg-cyan-500
-            hover:text-slate-800 transition-all duration-300"
-          >
-            continue with google
-          </button>
+          <OAuth />
         </div>
         <p className="mt-5">
           Already have an account?{" "}

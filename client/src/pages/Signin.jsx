@@ -8,6 +8,7 @@ import {
   signInSuccess,
   signInFailed,
 } from "../redux/user/userSlice.js";
+import OAuth from "../components/OAuth.jsx";
 
 const Signin = () => {
   const initialData = {
@@ -98,6 +99,7 @@ const Signin = () => {
               "sign in"
             )}
           </button>
+          <OAuth />
         </div>
         <p className="mt-5">
           Still don&apos;t have an account?{" "}
