@@ -1,25 +1,29 @@
 import { useState, useRef, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+
+import { Loader2 } from "lucide-react";
+
 import { app } from "../config/firebase";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailed,
+} from "../redux/user/userSlice";
 
 const Profile = () => {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const imageRef = useRef(null);
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState(null);
-  const [userDetails, setUserDetails] = useState({
-    username: currentUser.username,
-    email: currentUser.email,
-    password: "",
-    profileImage: currentUser.profileImage,
-  });
+  const [userDetails, setUserDetails] = useState({});
 
   useEffect(() => {
     if (file) {
@@ -49,10 +53,49 @@ const Profile = () => {
     );
   };
 
+  const handleChange = (e) => {
+    setUserDetails({ ...userDetails, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      dispatch(updateUserStart());
+
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userDetails),
+      });
+
+      const data = await res.json();
+
+      if (data.success === false) {
+        dispatch(updateUserFailed(data.message));
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+      alert("Profile has been updated!");
+    } catch (error) {
+      dispatch(updateUserFailed(error.message));
+    }
+  };
+
+  if (error) {
+    alert(error);
+  }
+
   return (
     <section className="w-full min-h-screen flex flex-col items-center gap-5">
       <h1 className="text-2xl mt-10">Profile</h1>
-      <form className="w-full max-w-[400px] flex flex-col items-center gap-3">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-[400px] flex flex-col items-center gap-3"
+      >
         <input
           onChange={(e) => setFile(e.target.files[0])}
           type="file"
@@ -62,7 +105,7 @@ const Profile = () => {
         />
         <img
           onClick={() => imageRef.current.click()}
-          src={userDetails.profileImage}
+          src={currentUser.profileImage}
           alt="user image"
           className="rounded-full object-cover w-20 h-20 cursor-pointer"
         />
@@ -76,7 +119,8 @@ const Profile = () => {
         <p>{uploadError !== null && uploadError}</p>
         <input
           type="text"
-          value={userDetails.username}
+          name="username"
+          defaultValue={currentUser.username}
           onChange={(e) =>
             setUserDetails({ ...userDetails, username: e.target.value })
           }
@@ -84,7 +128,8 @@ const Profile = () => {
         />
         <input
           type="email"
-          value={userDetails.email}
+          name="email"
+          defaultValue={currentUser.email}
           onChange={(e) =>
             setUserDetails({ ...userDetails, email: e.target.value })
           }
@@ -92,18 +137,24 @@ const Profile = () => {
         />
         <input
           type="password"
-          value={userDetails.password}
-          onChange={(e) =>
-            setUserDetails({ ...userDetails, password: e.target.value })
-          }
+          name="password"
+          placeholder="password"
+          onChange={handleChange}
           className="border w-full p-2 rounded-md outline-none focus:outline-cyan-400"
         />
         <button
-          onClick={() => {}}
+          disabled={loading}
           className="w-full bg-slate-500 p-2 rounded-md capitalize text-white
           hover:bg-slate-600"
         >
-          update
+          {loading ? (
+            <div className="flex justify-center items-center gap-2">
+              Updating
+              <Loader2 className="animate-spin transition-all duration-300" />
+            </div>
+          ) : (
+            "update"
+          )}
         </button>
       </form>
       <div className="w-full max-w-[400px] flex items-center justify-between">

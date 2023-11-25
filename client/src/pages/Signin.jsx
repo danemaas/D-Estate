@@ -32,7 +32,7 @@ const Signin = () => {
         },
         body: JSON.stringify(userDetails),
       });
-
+      console.log(res);
       const data = await res.json();
 
       if (data.success === false) {
