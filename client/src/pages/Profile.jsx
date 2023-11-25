@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getDownloadURL,
@@ -85,6 +86,7 @@ const Profile = () => {
       }
 
       dispatch(updateUserSuccess(data));
+      setUploadProgress(0);
       alert("Profile has been updated!");
     } catch (error) {
       dispatch(updateUserFailed(error.message));
@@ -203,6 +205,13 @@ const Profile = () => {
             "update"
           )}
         </button>
+        <Link
+          to="/create-listing"
+          className="border-2 w-full p-2 rounded-md capitalize font-medium hover:bg-cyan-500
+          hover:border-cyan-500 transition-all duration-300 text-center"
+        >
+          create listing
+        </Link>
       </form>
       <div className="w-full max-w-[400px] flex items-center justify-between">
         <button
