@@ -6,22 +6,43 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { Loader2, XIcon } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import { app } from "../config/firebase";
 
 const CreateListing = () => {
+  const initialValue = {
+    name: "",
+    description: "",
+    address: "",
+    regularPrice: 0,
+    discountedPrice: 0,
+    bedrooms: 1,
+    bathrooms: 1,
+    furnished: false,
+    parking: false,
+    type: "rent",
+    offer: false,
+    imageUrls: [],
+    userRef: "",
+  };
+
+  const navigate = useNavigate();
+
   const [files, setFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [listingData, setListingData] = useState({
-    imageUrls: [],
-  });
+  const [submitListingError, setSubmitListingError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [listingData, setListingData] = useState(initialValue);
+  const { currentUser } = useSelector((state) => state.user);
 
   const handleImageUpload = async () => {
     try {
-      setLoading(true);
+      setUploading(true);
       if (files.length < 1 || files.length + listingData.imageUrls.length > 6) {
-        setLoading(false);
+        setUploading(false);
         return setImageUploadError("Please upload 1 to 6 images.");
       }
 
@@ -34,7 +55,7 @@ const CreateListing = () => {
         ...listingData,
         imageUrls: listingData.imageUrls.concat(successfulUploads),
       });
-      setLoading(false);
+      setUploading(false);
       setImageUploadError("");
     } catch (error) {
       setImageUploadError(`Error uploading images: ${error.message}`);
@@ -73,7 +94,71 @@ const CreateListing = () => {
   };
 
   const handleChange = (e) => {
-    setListingData({ ...listingData, [e.target.name]: e.target.value });
+    switch (e.target.name) {
+      case "sale":
+      case "rent":
+        setListingData({ ...listingData, type: e.target.name });
+        break;
+
+      case "parking":
+      case "furnished":
+      case "offer":
+        setListingData({ ...listingData, [e.target.name]: e.target.checked });
+        break;
+
+      default:
+        if (
+          e.target.type === "number" ||
+          e.target.type === "text" ||
+          e.target.type === "textarea"
+        ) {
+          setListingData({ ...listingData, [e.target.name]: e.target.value });
+        }
+        break;
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (
+        listingData.imageUrls.length < 1 ||
+        listingData.imageUrls.length > 6
+      ) {
+        return setSubmitListingError("Please upload 1 to 6 images.");
+      }
+
+      if (+listingData.regularPrice < +listingData.discountedPrice) {
+        return setSubmitListingError(
+          "Discount price must be lower than regular price."
+        );
+      }
+
+      setSubmitting(true);
+      setSubmitListingError("");
+
+      const res = await fetch("/api/listing/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...listingData,
+          userRef: currentUser._id,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        setSubmitting(false);
+        return setSubmitListingError(data.message);
+      }
+
+      navigate(`/listing/${data._id}`);
+    } catch (error) {
+      setSubmitting(false);
+      setSubmitListingError(error.message);
+    }
   };
 
   return (
@@ -82,6 +167,7 @@ const CreateListing = () => {
         Create Listing
       </h2>
       <form
+        onSubmit={handleSubmit}
         className="w-full p-3 md:max-w-[1200px] mx-auto flex flex-col md:flex-row
         justify-around md:gap-5"
       >
@@ -96,6 +182,8 @@ const CreateListing = () => {
                 minLength={10}
                 maxLength={60}
                 required
+                onChange={handleChange}
+                value={listingData.name}
               />
             </div>
             <div>
@@ -105,6 +193,8 @@ const CreateListing = () => {
                 placeholder="Description"
                 className="w-full resize-none border-2 p-2 rounded-md"
                 required
+                onChange={handleChange}
+                value={listingData.description}
               />
             </div>
             <div>
@@ -114,6 +204,8 @@ const CreateListing = () => {
                 placeholder="Address"
                 className="w-full border-2 p-2 rounded-md"
                 required
+                onChange={handleChange}
+                value={listingData.address}
               />
             </div>
           </div>
@@ -123,6 +215,8 @@ const CreateListing = () => {
                 type="checkbox"
                 name="furnished"
                 className="cursor-pointer"
+                onChange={handleChange}
+                checked={listingData.furnished}
               />
               <label>Furnished</label>
             </div>
@@ -131,19 +225,39 @@ const CreateListing = () => {
                 type="checkbox"
                 name="parking"
                 className="cursor-pointer"
+                onChange={handleChange}
+                checked={listingData.parking}
               />
               <label>Parking</label>
             </div>
             <div className="flex items-center gap-1">
-              <input type="checkbox" name="rent" className="cursor-pointer" />
+              <input
+                type="checkbox"
+                name="rent"
+                className="cursor-pointer"
+                onChange={handleChange}
+                checked={listingData.type === "rent"}
+              />
               <label>Rent</label>
             </div>
             <div className="flex items-center gap-1">
-              <input type="checkbox" name="sale" className="cursor-pointer" />
-              <label>Sell</label>
+              <input
+                type="checkbox"
+                name="sale"
+                className="cursor-pointer"
+                onChange={handleChange}
+                checked={listingData.type === "sale"}
+              />
+              <label>Sale</label>
             </div>
             <div className="flex items-center gap-1">
-              <input type="checkbox" name="offer" className="cursor-pointer" />
+              <input
+                type="checkbox"
+                name="offer"
+                className="cursor-pointer"
+                onChange={handleChange}
+                checked={listingData.offer}
+              />
               <label>Offer</label>
             </div>
           </div>
@@ -156,6 +270,8 @@ const CreateListing = () => {
                 min={1}
                 max={10}
                 required
+                onChange={handleChange}
+                value={listingData.bedrooms}
               />
               <label>Bedrooms</label>
             </div>
@@ -167,6 +283,8 @@ const CreateListing = () => {
                 max={20}
                 required
                 className="w-20 border-2 p-2 rounded-md"
+                onChange={handleChange}
+                value={listingData.bathrooms}
               />
               <label>Bathrooms</label>
             </div>
@@ -178,25 +296,35 @@ const CreateListing = () => {
               defaultValue={0}
               className=" border-2 p-2 rounded-md"
               required
+              onChange={handleChange}
+              value={listingData.regularPrice}
             />
             <label className="flex flex-col items-center justify-center text-[14px]">
               Regular Price{" "}
-              <span className="text-xs font-semibold">($ /month)</span>
+              {listingData.type === "rent" && (
+                <span className="text-xs font-semibold">($ /month)</span>
+              )}
             </label>
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              name="regularPrice"
-              defaultValue={0}
-              required
-              className=" border-2 p-2 rounded-md"
-            />
-            <label className="flex flex-col items-center justify-center text-[14px]">
-              Discounted Price{" "}
-              <span className="text-xs font-semibold">($ /month)</span>
-            </label>
-          </div>
+          {listingData.offer && (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                name="discountedPrice"
+                defaultValue={0}
+                required
+                className=" border-2 p-2 rounded-md"
+                onChange={handleChange}
+                value={listingData.discountedPrice}
+              />
+              <label className="flex flex-col items-center justify-center text-[14px]">
+                Discounted Price{" "}
+                {listingData.type === "rent" && (
+                  <span className="text-xs font-semibold">($ /month)</span>
+                )}
+              </label>
+            </div>
+          )}
         </div>
         <div className="w-full flex flex-col gap-3">
           <label>
@@ -215,12 +343,12 @@ const CreateListing = () => {
             />
             <button
               type="button"
-              disabled={loading}
+              disabled={submitting || uploading}
               onClick={handleImageUpload}
               className="w-[100px] py-2 border-2 border-cyan-500 rounded-md
               hover:bg-cyan-500 transition-all duration-200"
             >
-              {loading ? (
+              {uploading ? (
                 <div className="flex items-center gap-1">
                   Uploading <Loader2 className="animate-spin" />
                 </div>
@@ -257,11 +385,23 @@ const CreateListing = () => {
               </div>
             ))}
           <button
+            disabled={submitting || uploading}
             className="border-2 p-2 rounded-md uppercase bg-slate-500
             text-white border-slate-500 hover:bg-slate-700 my-5"
           >
-            submit listing
+            {submitting ? (
+              <span className="flex items-center gap-2">
+                Submitting <Loader2 className="animate-spin" />
+              </span>
+            ) : (
+              "submit listing"
+            )}
           </button>
+          {submitListingError && (
+            <p className="text-red-500 text-center p-2 border-2 border-red-500 rounded-md">
+              {submitListingError}
+            </p>
+          )}
         </div>
       </form>
     </section>
