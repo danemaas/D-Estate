@@ -6,7 +6,6 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { Loader2, XIcon } from "lucide-react";
-import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { app } from "../config/firebase";
@@ -37,7 +36,6 @@ const UpdateListing = () => {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [listingData, setListingData] = useState(initialValue);
-  const { currentUser } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchListing = async () => {
