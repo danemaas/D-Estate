@@ -30,7 +30,9 @@ const Profile = () => {
   const [file, setFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState(null);
+  const [showListingError, setShowListingError] = useState(null);
   const [userDetails, setUserDetails] = useState({});
+  const [listingData, setListingData] = useState([]);
 
   useEffect(() => {
     if (file) {
@@ -134,6 +136,29 @@ const Profile = () => {
     }
   };
 
+  const handleShowListings = async (e) => {
+    e.preventDefault();
+
+    try {
+      setShowListingError(null);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+
+      if (data.success === false) {
+        return setShowListingError(data.message);
+      }
+
+      setListingData(data);
+    } catch (error) {
+      setShowListingError(error.message);
+    }
+  };
+
+  const handleHideListings = (e) => {
+    e.preventDefault();
+    setListingData([]);
+  };
+
   if (error) {
     alert(error);
   }
@@ -207,8 +232,8 @@ const Profile = () => {
         </button>
         <Link
           to="/create-listing"
-          className="border-2 w-full p-2 rounded-md capitalize font-medium hover:bg-cyan-500
-          hover:border-cyan-500 transition-all duration-300 text-center"
+          className="border-2 border-slate-600 w-full p-2 rounded-md capitalize font-medium
+          hover:bg-cyan-500 hover:border-cyan-500 transition-all duration-300 text-center"
         >
           create listing
         </Link>
@@ -228,6 +253,55 @@ const Profile = () => {
         >
           sign out
         </button>
+      </div>
+      <div className="w-full max-w-[400px] flex flex-col items-center gap-5">
+        {listingData.length === 0 ? (
+          <button onClick={handleShowListings} className="text-cyan-800">
+            Show Listings
+          </button>
+        ) : (
+          <button onClick={handleHideListings} className="text-cyan-800">
+            Hide Listings
+          </button>
+        )}
+
+        {showListingError && (
+          <p className="border-2 border-red-500 w-full p-2 rounded-md text-red-500 text-center">
+            {showListingError}
+          </p>
+        )}
+
+        {listingData.length !== 0 && (
+          <>
+            <h2 className="text-2xl font-semibold">Your Listings</h2>
+            {listingData.map((listing) => (
+              <div
+                key={listing._id}
+                className="w-full border-2 border-cyan-500 rounded-md p-2 flex items-center
+                justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={listing.imageUrls[0]}
+                    alt={listing.name}
+                    className="w-28 h-30 object-cover"
+                  />
+                  <Link
+                    to={`/listing/${listing._id}`}
+                    className="cursor-pointer border-b-2 border-b-transparent hover:border-b-cyan-500
+                    hover:text-cyan-800 transition-all duration-300"
+                  >
+                    {listing.name}
+                  </Link>
+                </div>
+                <div className="flex flex-col items-center justify-center">
+                  <button className="text-cyan-800">Edit</button>
+                  <button className="text-red-500">Delete</button>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </div>
     </section>
   );
