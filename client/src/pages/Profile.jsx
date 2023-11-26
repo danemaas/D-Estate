@@ -314,7 +314,12 @@ const Profile = () => {
                   </Link>
                 </div>
                 <div className="flex flex-col items-center justify-center">
-                  <button className="text-cyan-800">Edit</button>
+                  <Link
+                    to={`/update-listing/${listing._id}`}
+                    className="text-cyan-800"
+                  >
+                    Edit
+                  </Link>
                   <button
                     onClick={() => handleDeleteListing(listing._id)}
                     className="text-red-500"
