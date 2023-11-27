@@ -84,6 +84,7 @@ const Listing = () => {
               {listingData.offer && (
                 <p className="border-b-2 border-b-cyan-500 font-semibold">
                   ${listingData.discountedPrice.toLocaleString("en-US")}
+                  {listingData.type === "rent" && "/ month"}
                 </p>
               )}
               <p
@@ -94,11 +95,12 @@ const Listing = () => {
                 }`}
               >
                 ${listingData.regularPrice.toLocaleString("en-US")}
+                {listingData.type === "rent" && "/ month"}
               </p>
             </div>
 
             <p className="text-justify">{listingData.description}</p>
-            <ul className="w-full max-w-[500px] flex items-center justify-between">
+            <ul className="w-full max-w-[500px] flex items-center gap-5">
               <li className="flex items-center gap-1">
                 <BedDouble className="text-cyan-700" />
                 {listingData.bedrooms > 1 ? (
@@ -109,10 +111,10 @@ const Listing = () => {
               </li>
               <li className="flex items-center gap-1">
                 <ShowerHead className="text-cyan-700" />
-                {listingData.bedrooms > 1 ? (
-                  <span>{listingData.bedrooms} bathrooms</span>
+                {listingData.bathrooms > 1 ? (
+                  <span>{listingData.bathrooms} baths</span>
                 ) : (
-                  <span>{listingData.bedrooms} bathroom</span>
+                  <span>{listingData.bathrooms} bath</span>
                 )}
               </li>
               {listingData.furnished && (

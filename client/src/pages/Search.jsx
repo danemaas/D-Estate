@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { ChevronRight } from "lucide-react";
 import debounce from "lodash/debounce";
 
 import ListingCard from "../components/ListingCard";
@@ -16,6 +17,7 @@ const Search = () => {
   });
 
   const [searchResults, setSearchResults] = useState([]);
+  const [showMore, setShowMore] = useState(false);
 
   const handleSearch = async () => {
     const urlParams = new URLSearchParams();
@@ -29,6 +31,9 @@ const Search = () => {
 
     const res = await fetch(`/api/listing/search?${urlParams}`);
     const data = await res.json();
+    if (data.length === 10) {
+      setShowMore(true);
+    }
     setSearchResults(data);
   };
 
@@ -56,6 +61,22 @@ const Search = () => {
       const [sort = "createdAt", order = "desc"] = value.split("_");
       setQueries({ ...queries, sort, order });
     }
+  };
+
+  const handleShowMore = async (e) => {
+    e.preventDefault;
+    const startIndex = searchResults.length;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("startIndex", startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listing/search?${searchQuery}`);
+    const data = await res.json();
+
+    if (data.length < 10) {
+      setShowMore(false);
+    }
+
+    setSearchResults([...searchResults, ...data]);
   };
 
   return (
@@ -161,6 +182,17 @@ const Search = () => {
                 <ListingCard listing={result} />
               </Link>
             ))}
+          </div>
+        )}
+        {showMore && (
+          <div className="my-5 flex items-center gap-1">
+            <button
+              onClick={handleShowMore}
+              className="text-base border-b-2 hover:border-cyan-800"
+            >
+              show more
+            </button>
+            <ChevronRight className="w-5 h-5" />
           </div>
         )}
       </div>
