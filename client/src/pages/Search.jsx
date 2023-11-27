@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import debounce from "lodash/debounce";
+
+import ListingCard from "../components/ListingCard";
 
 const Search = () => {
   const searchTerm = new URLSearchParams(location.search).get("searchTerm");
@@ -142,13 +144,19 @@ const Search = () => {
       </div>
       <hr className="border border-slate-700/20 md:min-h-screen" />
       <div className="p-3">
-        <h2>Search Results:</h2>
+        <h2 className="text-xl mb-5">Search Results:</h2>
         {searchResults.length < 1 ? (
           <div>
             <p>No listings found</p>
           </div>
         ) : (
-          <div></div>
+          <div className="flex flex-wrap items-center gap-3">
+            {searchResults.map((result) => (
+              <Link key={result._id} to={`/listing/${result._id}`}>
+                <ListingCard listing={result} />
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </section>
