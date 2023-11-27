@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 
 const ListingCard = ({ listing }) => {
   return (
-    <div className="w-[250px] h-[280px] shadow-sm shadow-black/50 rounded-md overflow-hidden">
+    <div className="w-[400px] md:w-[250px] h-[280px] shadow-sm shadow-black/50 rounded-md overflow-hidden">
       <img
         src={listing.imageUrls[0]}
         alt={listing.name}

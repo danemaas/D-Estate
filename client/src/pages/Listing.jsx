@@ -64,7 +64,7 @@ const Listing = () => {
                 <div className="w-full h-[500px]">
                   <img
                     src={url}
-                    alt=""
+                    alt="listing image"
                     className="w-full h-full object-cover object-center"
                   />
                 </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import debounce from "lodash/debounce";
 
@@ -7,13 +7,16 @@ import ListingCard from "../components/ListingCard";
 
 const Search = () => {
   const [queries, setQueries] = useState({
-    searchTerm: "",
-    type: "all",
-    offer: false,
-    parking: false,
-    furnished: false,
-    sort: "createdAt",
-    order: "desc",
+    searchTerm: new URLSearchParams(location.search).get("searchTerm") || "",
+    type: new URLSearchParams(location.search).get("type") || "all",
+    offer:
+      new URLSearchParams(location.search).get("offer") === "true" || false,
+    parking:
+      new URLSearchParams(location.search).get("parking") === "true" || false,
+    furnished:
+      new URLSearchParams(location.search).get("furnished") === "true" || false,
+    sort: new URLSearchParams(location.search).get("sort") || "createdAt",
+    order: new URLSearchParams(location.search).get("order") || "desc",
   });
 
   const [searchResults, setSearchResults] = useState([]);
@@ -40,13 +43,6 @@ const Search = () => {
   const debouncedSearch = debounce(handleSearch, 300);
 
   useEffect(() => {
-    setQueries({
-      ...queries,
-      searchTerm: new URLSearchParams(location.search).get("searchTerm"),
-    });
-  }, [searchResults]);
-
-  useEffect(() => {
     debouncedSearch();
   }, [queries]);
 
@@ -60,6 +56,8 @@ const Search = () => {
     } else if (name === "sort_order") {
       const [sort = "createdAt", order = "desc"] = value.split("_");
       setQueries({ ...queries, sort, order });
+    } else {
+      setQueries({ ...queries, searchTerm: searchTerm + " " });
     }
   };
 
@@ -169,14 +167,14 @@ const Search = () => {
         </form>
       </div>
       <hr className="border border-slate-700/20 md:min-h-screen" />
-      <div className="p-3">
+      <div className="w-full p-3">
         <h2 className="text-xl mb-5">Search Results:</h2>
         {searchResults.length < 1 ? (
           <div>
             <p>No listings found</p>
           </div>
         ) : (
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {searchResults.map((result) => (
               <Link key={result._id} to={`/listing/${result._id}`}>
                 <ListingCard listing={result} />
