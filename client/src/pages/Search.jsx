@@ -5,10 +5,8 @@ import debounce from "lodash/debounce";
 import ListingCard from "../components/ListingCard";
 
 const Search = () => {
-  const searchTerm = new URLSearchParams(location.search).get("searchTerm");
-  const navigate = useNavigate();
-
   const [queries, setQueries] = useState({
+    searchTerm: "",
     type: "all",
     offer: false,
     parking: false,
@@ -21,7 +19,7 @@ const Search = () => {
 
   const handleSearch = async () => {
     const urlParams = new URLSearchParams();
-    urlParams.set("searchTerm", searchTerm);
+    urlParams.set("searchTerm", queries.searchTerm);
     urlParams.set("type", queries.type);
     urlParams.set("offer", queries.offer);
     urlParams.set("parking", queries.parking);
@@ -35,6 +33,13 @@ const Search = () => {
   };
 
   const debouncedSearch = debounce(handleSearch, 300);
+
+  useEffect(() => {
+    setQueries({
+      ...queries,
+      searchTerm: new URLSearchParams(location.search).get("searchTerm"),
+    });
+  }, [searchResults]);
 
   useEffect(() => {
     debouncedSearch();

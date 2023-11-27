@@ -8,21 +8,13 @@ const Header = () => {
   const { currentUser } = useSelector((state) => state.user);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
-    const searchTerm = urlParams.get("searchTerm");
-
-    if (searchTerm) {
-      setSearchInput(searchTerm);
-    }
-  }, [location.search]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams(window.location.search);
 
     urlParams.set("searchTerm", searchInput);
     const searchQuery = urlParams.toString();
+    setSearchInput("");
     navigate(`/search?${searchQuery}`);
   };
 

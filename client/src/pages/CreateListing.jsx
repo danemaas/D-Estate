@@ -94,27 +94,17 @@ const CreateListing = () => {
   };
 
   const handleChange = (e) => {
-    switch (e.target.name) {
-      case "sale":
-      case "rent":
-        setListingData({ ...listingData, type: e.target.name });
-        break;
+    const { name, type, value, checked } = e.target;
 
-      case "parking":
-      case "furnished":
-      case "offer":
-        setListingData({ ...listingData, [e.target.name]: e.target.checked });
-        break;
+    const checkboxNames = ["parking", "furnished", "offer"];
+    const textInputTypes = ["number", "text", "textarea"];
 
-      default:
-        if (
-          e.target.type === "number" ||
-          e.target.type === "text" ||
-          e.target.type === "textarea"
-        ) {
-          setListingData({ ...listingData, [e.target.name]: e.target.value });
-        }
-        break;
+    if (["sale", "rent"].includes(name)) {
+      setListingData({ ...listingData, type: name });
+    } else if (checkboxNames.includes(name)) {
+      setListingData({ ...listingData, [name]: checked });
+    } else if (textInputTypes.includes(type)) {
+      setListingData({ ...listingData, [name]: value });
     }
   };
 

@@ -6,7 +6,7 @@ const ListingCard = ({ listing }) => {
       <img
         src={listing.imageUrls[0]}
         alt={listing.name}
-        className="hover:scale-105 transition-all duration-300"
+        className="hover:scale-105 transition-all duration-300 w-full h-[160px] object-cover"
       />
       <div className="p-2 flex flex-col">
         <h2 className="text-sm text-cyan-800 font-semibold mb-1">
