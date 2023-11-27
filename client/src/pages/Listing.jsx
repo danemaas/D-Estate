@@ -9,18 +9,20 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import SwiperCore from "swiper";
-
 import "swiper/css/bundle";
+
+import Contact from "../components/Contact";
 
 const Listing = () => {
   const listingId = useParams().id;
   const [listingData, setListingData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
+  const { currentUser } = useSelector((state) => state.user);
 
   SwiperCore.use([Navigation]);
 
@@ -128,39 +130,9 @@ const Listing = () => {
                 </li>
               )}
             </ul>
-            <form className="flex flex-col justify-center gap-3 w-full max-w-[990px] mx-auto">
-              {showForm && (
-                <>
-                  <p className="ps-2">
-                    Contact <span className="font-semibold">the owner</span> for
-                    the{" "}
-                    <span className="font-semibold">{listingData.name}</span>
-                  </p>
-                  <textarea
-                    name="message"
-                    className="w-full h-20 rounded-md resize-none"
-                  />
-                </>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowForm(true)}
-                className="border-2 border-slate-600 p-2 rounded-md hover:bg-cyan-600
-              hover:border-cyan-600 font-semibold w-full max-w-[600px] mx-auto"
-              >
-                {showForm ? "Send Message" : "Contact Owner"}
-              </button>
-              {showForm && (
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="border-2 border-slate-600 p-2 rounded-md hover:bg-cyan-600
-                  hover:border-cyan-600 font-semibold w-full max-w-[600px] mx-auto"
-                >
-                  Cancel
-                </button>
-              )}
-            </form>
+            {currentUser && listingData.userRef !== currentUser._id && (
+              <Contact listingData={listingData} />
+            )}
           </div>
         </>
       )}
