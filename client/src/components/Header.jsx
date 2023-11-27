@@ -1,11 +1,31 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { useSelector } from "react-redux";
 
 const Header = () => {
   const [searchInput, setSearchInput] = useState("");
   const { currentUser } = useSelector((state) => state.user);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchTerm = urlParams.get("searchTerm");
+
+    if (searchTerm) {
+      setSearchInput(searchTerm);
+    }
+  }, [location.search]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const urlParams = new URLSearchParams(window.location.search);
+
+    urlParams.set("searchTerm", searchInput);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  };
+
   return (
     <header
       className="w-full flex justify-between items-center py-3 px-2 md:px-10
@@ -23,6 +43,7 @@ const Header = () => {
         </h1>
       </Link>
       <form
+        onSubmit={handleSubmit}
         className="border-2 flex items-center gap-1 py-1 px-2 rounded-md bg-white
         w-[280px] lg:w-[500px] group"
       >
@@ -33,7 +54,7 @@ const Header = () => {
           onChange={(e) => setSearchInput(e.target.value)}
           className="outline-none border-none bg-transparent ps-1 w-full text-sm md:text-base"
         />
-        <button onClick={(e) => e.preventDefault()} className="cursor-pointer">
+        <button onClick={(e) => {}} className="cursor-pointer">
           <Search className="group-hover:text-cyan-400" />
         </button>
       </form>
